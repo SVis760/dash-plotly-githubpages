@@ -8,8 +8,8 @@ run_app:
 	python3 app.py & sleep 60
 
 	# Download necessary Dash-generated static files directly into `pages_files/`
-	wget -q -O pages_files/_dash-layout.json http://127.0.0.1:8050/_dash-layout || (echo "Failed to download _dash-layout"; exit 1)
-	wget -q -O pages_files/_dash-dependencies.json http://127.0.0.1:8050/_dash-dependencies || (echo "Failed to download _dash-dependencies"; exit 1)
+	wget -q -O pages_files/_dash-layout.json http://127.0.0.1:8050/dash-plotly-githubpages/_dash-layout || (echo "Failed to download _dash-layout"; exit 1)
+	wget -q -O pages_files/_dash-dependencies.json http://127.0.0.1:8050/dash-plotly-githubpages/_dash-dependencies || (echo "Failed to download _dash-dependencies"; exit 1)
 
 	# Copy Dash Pages so they are included in the build
 	cp -r pages pages_files/pages || echo "No pages directory found, skipping."
