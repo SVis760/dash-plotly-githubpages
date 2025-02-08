@@ -4,8 +4,10 @@ run_app:
 	mkdir -p pages_files/assets
 	mkdir -p pages_files/pages  # Ensure Dash Pages are copied
 
-	# Start the Dash app and wait for it to fully start
-	python3 app.py & sleep 60
+	# Start the Dash app in the background and capture its PID, then wait for it to fully start
+	python3 app.py & \
+	APP_PID=$$! && \
+	sleep 60
 
 	# Download necessary Dash-generated static files directly into `pages_files/`
 	wget -q -O pages_files/_dash-layout.json http://127.0.0.1:8050/dash-plotly-githubpages/_dash-layout || (echo "Failed to download _dash-layout"; exit 1)
@@ -15,7 +17,7 @@ run_app:
 	cp -r pages pages_files/pages || echo "No pages directory found, skipping."
 
 	# Only process files if `pages_files` is not empty
-	if [ -d "pages_files" ] && [ "$(ls -A pages_files 2>/dev/null)" ]; then \
+	if [ -d "pages_files" ] && [ "$$(ls -A pages_files 2>/dev/null)" ]; then \
 	    find pages_files -type f -exec sed -i.bak 's|_dash-component-suites|dash-plotly-githubpages/_dash-component-suites|g' {} \; && \
 	    find pages_files -type f -exec sed -i.bak 's|_dash-layout|dash-plotly-githubpages/_dash-layout.json|g' {} \; && \
 	    find pages_files -type f -exec sed -i.bak 's|_dash-dependencies|dash-plotly-githubpages/_dash-dependencies.json|g' {} \; && \
@@ -29,11 +31,5 @@ run_app:
 	# Move assets to the correct directory, but avoid errors if empty
 	ls assets/ 2>/dev/null && mv assets/* pages_files/assets/ || echo "No assets to move."
 
-	# Kill the running Dash app process cleanly
-	pkill -f "python3 app.py" || echo "No running Dash app found."
-
-clean_dirs:
-	# Remove temporary directories
-	rm -rf 127.0.0.1:8050/
-	rm -rf pages_files/
-	rm -rf joblib
+	# Kill the running Dash app process cleanly using the captured PID
+	kill $$APP_PID || echo "No running Dash app found."
