@@ -1,18 +1,20 @@
 name: Deploy Dash App to GitHub Pages
 on: [push]
+
 jobs:
   run_app:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Updated version
 
       - name: Setup Pages
         if: github.ref == 'refs/heads/main'
-        uses: actions/configure-pages@v1
+        uses: actions/configure-pages@v4  # Updated version
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v4  # Updated version
         with:
           python-version: '3.10'
 
@@ -27,8 +29,9 @@ jobs:
           make run_app
 
       - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-artifact@v4  
         with:
+          name: github-pages
           path: "./pages_files"
 
   deploy-pages:
@@ -41,7 +44,8 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4 
