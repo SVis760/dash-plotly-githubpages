@@ -5,7 +5,7 @@ run_app:
 	mkdir -p pages_files/pages  # Ensure Dash Pages are copied
 
 	# Start the Dash app in the background and capture its PID, then wait for it to fully start
-	python3 app.py & APP_PID=$$! && sleep 60
+	python3 app.py & APP_PID=$$! && sleep 120
 
 	# Download necessary Dash-generated static files directly into `pages_files/`
 	wget -q -O pages_files/_dash-layout.json http://127.0.0.1:8050/dash-plotly-githubpages/_dash-layout || (echo "Failed to download _dash-layout"; exit 1)
