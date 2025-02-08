@@ -26,6 +26,9 @@ run_app:
 	    echo "Warning: pages_files is empty or missing, skipping path fixes."; \
 	fi
 
+        # Now, capture the fully rendered HTML using Puppeteer
+	node capture.js
+
 	# Move assets to the correct directory, but avoid errors if empty
 	ls assets/ 2>/dev/null && mv assets/* pages_files/assets/ || echo "No assets to move."
 
