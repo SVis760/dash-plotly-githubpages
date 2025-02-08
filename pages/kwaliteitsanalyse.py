@@ -177,7 +177,14 @@ def update_data_table(*vals):
             df_local = df_local[df_local[f"prefLabelLaag{i}"] == v]
     return df_local.to_dict("records")
 
-
+dash_table.DataTable(
+    id="data-table",
+    columns=[{'name': col, 'id': col} for col in merged_df.columns],
+    data=merged_df.to_dict("records"),
+    page_size=10,
+    filter_action="native",
+    sort_action="native",
+)
 
 # Try loading data from a local file first
 try:
