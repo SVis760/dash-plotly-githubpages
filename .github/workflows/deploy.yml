@@ -23,10 +23,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Run Makefile commands
+      - name: Run Makefile
         run: |
-          make clean_dirs
+          set -x  # Enables debug mode
           make run_app
+
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4  
