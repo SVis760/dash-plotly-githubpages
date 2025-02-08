@@ -7,8 +7,15 @@ run_app:
 	# Start the Dash app in the background and capture its PID
 	python3 app.py & APP_PID=$$! ; \
 	\
-	# Wait for the app to be ready (here we use a fixed sleep, adjust as needed)
-	sleep 120 ; \
+	# Poll for the _dash-layout endpoint until it’s available (max 60 seconds)
+	for i in {1..30}; do \
+	    if wget -q --spider http://127.0.0.1:8050/dash-plotly-githubpages/_dash-layout; then \
+	        echo "Dash app is ready."; \
+	        break; \
+	    fi; \
+	    echo "Waiting for Dash app to be ready..."; \
+	    sleep 2; \
+	done ; \
 	\
 	# Download necessary Dash-generated static files directly into pages_files/
 	wget -q -O pages_files/_dash-layout.json http://127.0.0.1:8050/dash-plotly-githubpages/_dash-layout || (echo "Failed to download _dash-layout"; exit 1) ; \
