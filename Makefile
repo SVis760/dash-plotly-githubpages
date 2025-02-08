@@ -26,8 +26,12 @@ run_app:
 	    echo "Warning: pages_files is empty or missing, skipping path fixes."; \
 	fi
 
-   # Capture the fully rendered page using Playwright
-	python3 capture.py
+    # Start the Dash app in the background and capture its PID
+	python3 app.py & APP_PID=$$! && \
+	# Wait/poll until the app is ready (or use a sleep)
+	sleep 60 && \
+	# Capture the fully rendered page using Playwright
+	python3 capture.py && \
 
 	# Move assets to the correct directory, but avoid errors if empty
 	ls assets/ 2>/dev/null && mv assets/* pages_files/assets/ || echo "No assets to move."

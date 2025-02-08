@@ -1,33 +1,29 @@
-from playwright.sync_api import sync_playwright
-import time
+from dash import Dash, html, dcc, dash_table
+import dash
+import json
 
-# Define the URL of your locally running Dash app
-URL = "http://127.0.0.1:8050/dash-plotly-githubpages/"
+app = Dash(__name__, 
+           pages_folder="pages",
+           use_pages=True,
+           suppress_callback_exceptions=True,
+           requests_pathname_prefix="/your-repo-name/")
 
-def capture_snapshot():
-    with sync_playwright() as p:
-        # Launch the browser in headless mode
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
+app.layout = html.Div([
+    dcc.Input(id='my-input', value='initial value'),
+    html.Div(id='my-output')
+])
 
-        # Navigate to the Dash app and wait until network is idle
-        page.goto(URL, wait_until="networkidle")
-        
-        # Optional: wait for a specific selector to ensure data is rendered (e.g., your data table)
-        page.wait_for_selector("#data-table", timeout=60000)
-        
-        # Give extra time if needed
-        time.sleep(2)
+# Clientside callback
+app.clientside_callback(
+    """
+    function(input_value) {
+        // Do something in JavaScript.
+        return "You entered: " + input_value;
+    }
+    """,
+    dash.Output('my-output', 'children'),
+    [dash.Input('my-input', 'value')]
+)
 
-        # Get the page's HTML content
-        html = page.content()
-        
-        # Save the HTML snapshot to a file
-        with open("static_index.html", "w", encoding="utf-8") as f:
-            f.write(html)
-        
-        browser.close()
-        print("Snapshot saved as static_index.html")
-
-if __name__ == "__main__":
-    capture_snapshot()
+if __name__ == '__main__':
+    app.run(debug=False)
