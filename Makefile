@@ -6,10 +6,9 @@ run_app:
 	# Start the Dash app and wait for it to fully start
 	python3 app.py & sleep 60
 
-	# Download the necessary Dash-generated static files
-	wget -r -np -P pages_files http://127.0.0.1:8050/
-	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-layout 
-	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-dependencies
+	# Download necessary Dash-generated static files
+	wget -q -O pages_files/_dash-layout.json http://127.0.0.1:8050/_dash-layout
+	wget -q -O pages_files/_dash-dependencies.json http://127.0.0.1:8050/_dash-dependencies
 
 	# Fetch required Dash components
 	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-graph.js
@@ -22,7 +21,7 @@ run_app:
 
 	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/plotly/package_data/plotly.min.js
 
-	# Ensure pages_files directory structure is correctly set
+	# Ensure correct directory structure
 	ls -a pages_files
 	ls -a pages_files/assets
 
@@ -34,12 +33,8 @@ run_app:
 	find pages_files -type f -exec sed -i.bak 's|_dash-update-component|dash-plotly-githubpages/_dash-update-component|g' {} \;
 	find pages_files -type f -exec sed -i.bak 's|assets|dash-plotly-githubpages/assets|g' {} \;
 
-	# Rename files to JSON where necessary
-	mv pages_files/_dash-layout pages_files/_dash-layout.json
-	mv pages_files/_dash-dependencies pages_files/_dash-dependencies.json
-
-	# Move assets to correct directory
-	mv assets/* pages_files/assets/
+	# Move assets to the correct directory
+	mv assets/* pages_files/assets/ || true  # Ignore errors if assets are already in place
 
 	# Kill the running Dash app process cleanly
 	kill $(ps -C python -o pid=) || true
