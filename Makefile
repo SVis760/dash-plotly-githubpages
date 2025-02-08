@@ -6,20 +6,20 @@ run_app:
 	# Start the Dash app and wait for it to fully start
 	python3 app.py & sleep 60
 
-	# Download necessary Dash-generated static files
+	# Download necessary Dash-generated static files directly into `pages_files/`
 	wget -q -O pages_files/_dash-layout.json http://127.0.0.1:8050/_dash-layout
 	wget -q -O pages_files/_dash-dependencies.json http://127.0.0.1:8050/_dash-dependencies
 
-	# Fetch required Dash components
-	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-graph.js
-	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-highlight.js
-	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-markdown.js
-	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-datepicker.js
+	# Download component files while removing "127.0.0.1:8050/" from the directory structure
+	wget -r -np -nH --cut-dirs=1 -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-graph.js
+	wget -r -np -nH --cut-dirs=1 -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-highlight.js
+	wget -r -np -nH --cut-dirs=1 -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-markdown.js
+	wget -r -np -nH --cut-dirs=1 -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-datepicker.js
 
-	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dash_table/async-table.js
-	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dash_table/async-highlight.js
+	wget -r -np -nH --cut-dirs=1 -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dash_table/async-table.js
+	wget -r -np -nH --cut-dirs=1 -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dash_table/async-highlight.js
 
-	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/plotly/package_data/plotly.min.js
+	wget -r -np -nH --cut-dirs=1 -P pages_files http://127.0.0.1:8050/_dash-component-suites/plotly/package_data/plotly.min.js
 
 	# Ensure correct directory structure
 	ls -a pages_files
