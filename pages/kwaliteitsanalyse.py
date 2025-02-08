@@ -176,3 +176,18 @@ def update_data_table(*vals):
         if v is not None:
             df_local = df_local[df_local[f"prefLabelLaag{i}"] == v]
     return df_local.to_dict("records")
+
+
+
+# Try loading data from a local file first
+try:
+    with open("data.json", "r") as f:
+        data = json.load(f)
+except:
+    # If file doesn't exist, fetch data from API
+    url = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/topTerm/2/run?pageSize=10000"
+    data = requests.get(url).json()
+
+    # Save data for future use
+    with open("data.json", "w") as f:
+        json.dump(data, f)
