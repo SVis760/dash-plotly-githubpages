@@ -1,39 +1,51 @@
 run_app:
-	python3 app.py & sleep 30
+	# Ensure necessary directories exist
+	mkdir -p pages_files
+	mkdir -p pages_files/assets
 
-	wget -r http://127.0.0.1:8050/
-	wget -r http://127.0.0.1:8050/_dash-layout 
-	wget -r http://127.0.0.1:8050/_dash-dependencies
+	# Start the Dash app and wait for it to fully start
+	python3 app.py & sleep 60
 
-	wget -r http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-graph.js
-	wget -r http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-highlight.js
-	wget -r http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-markdown.js
-	wget -r http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-datepicker.js
+	# Download the necessary Dash-generated static files
+	wget -r -np -P pages_files http://127.0.0.1:8050/
+	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-layout 
+	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-dependencies
 
-	wget -r http://127.0.0.1:8050/_dash-component-suites/dash/dash_table/async-table.js
-	wget -r http://127.0.0.1:8050/_dash-component-suites/dash/dash_table/async-highlight.js
+	# Fetch required Dash components
+	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-graph.js
+	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-highlight.js
+	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-markdown.js
+	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dcc/async-datepicker.js
 
-	wget -r http://127.0.0.1:8050/_dash-component-suites/plotly/package_data/plotly.min.js
+	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dash_table/async-table.js
+	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/dash/dash_table/async-highlight.js
 
-	mv 127.0.0.1:8050 pages_files
+	wget -r -np -P pages_files http://127.0.0.1:8050/_dash-component-suites/plotly/package_data/plotly.min.js
+
+	# Ensure pages_files directory structure is correctly set
 	ls -a pages_files
 	ls -a pages_files/assets
 
-	find pages_files -exec sed -i.bak 's|_dash-component-suites|dash-plotly-githubpages\\/_dash-component-suites|g' {} \;
-	find pages_files -exec sed -i.bak 's|_dash-layout|dash-plotly-githubpages/_dash-layout.json|g' {} \;
-	find pages_files -exec sed -i.bak 's|_dash-dependencies|dash-plotly-githubpages/_dash-dependencies.json|g' {} \;
-	find pages_files -exec sed -i.bak 's|_reload-hash|dash-plotly-githubpages/_reload-hash|g' {} \;
-	find pages_files -exec sed -i.bak 's|_dash-update-component|dash-plotly-githubpages/_dash-update-component|g' {} \;
-	find pages_files -exec sed -i.bak 's|assets|dash-plotly-githubpages/assets|g' {} \;
+	# Fix file paths inside the downloaded files to match GitHub Pages structure
+	find pages_files -type f -exec sed -i.bak 's|_dash-component-suites|dash-plotly-githubpages/_dash-component-suites|g' {} \;
+	find pages_files -type f -exec sed -i.bak 's|_dash-layout|dash-plotly-githubpages/_dash-layout.json|g' {} \;
+	find pages_files -type f -exec sed -i.bak 's|_dash-dependencies|dash-plotly-githubpages/_dash-dependencies.json|g' {} \;
+	find pages_files -type f -exec sed -i.bak 's|_reload-hash|dash-plotly-githubpages/_reload-hash|g' {} \;
+	find pages_files -type f -exec sed -i.bak 's|_dash-update-component|dash-plotly-githubpages/_dash-update-component|g' {} \;
+	find pages_files -type f -exec sed -i.bak 's|assets|dash-plotly-githubpages/assets|g' {} \;
 
+	# Rename files to JSON where necessary
 	mv pages_files/_dash-layout pages_files/_dash-layout.json
 	mv pages_files/_dash-dependencies pages_files/_dash-dependencies.json
+
+	# Move assets to correct directory
 	mv assets/* pages_files/assets/
 
-	ps -C python -o pid= | xargs kill -9
+	# Kill the running Dash app process cleanly
+	kill $(ps -C python -o pid=) || true
 
 clean_dirs:
-	ls
+	# Remove temporary directories
 	rm -rf 127.0.0.1:8050/
 	rm -rf pages_files/
 	rm -rf joblib
