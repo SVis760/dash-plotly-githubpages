@@ -15,7 +15,7 @@ run_app:
 	cp -r pages pages_files/pages || echo "No pages directory found, skipping."
 
 	# Only process files if `pages_files` is not empty
-	if [ -d "pages_files" ] && [ "$(ls -A pages_files 2>/dev/null)" ]; then \
+	if [ -d "pages_files" ] && [ "$(ls -A pages_files 2>/dev/null)" != "" ]; then \
 	    find pages_files -type f -exec sed -i.bak 's|_dash-component-suites|dash-plotly-githubpages/_dash-component-suites|g' {} \; && \
 	    find pages_files -type f -exec sed -i.bak 's|_dash-layout|dash-plotly-githubpages/_dash-layout.json|g' {} \; && \
 	    find pages_files -type f -exec sed -i.bak 's|_dash-dependencies|dash-plotly-githubpages/_dash-dependencies.json|g' {} \; && \
