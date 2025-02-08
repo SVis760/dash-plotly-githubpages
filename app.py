@@ -1,25 +1,20 @@
-from dash import Dash, html, dcc
-import dash
-import plotly.express as px
+app = dash.get_app()  # Get the current Dash app instance
 
-px.defaults.template = "ggplot2"
-
-app = Dash(
-    __name__,
-    pages_folder="pages",
-    use_pages=True,
-    suppress_callback_exceptions=True,
-    requests_pathname_prefix="/dash-plotly-githubpages/"  # Set this to match your repo
+app.clientside_callback(
+    """
+    function(storeData, dropdown1) {
+        // storeData is an array of objects representing your data
+        var filtered = storeData;
+        // If a value is selected in dropdown-1, filter by the corresponding column.
+        if (dropdown1) {
+            filtered = filtered.filter(function(row) {
+                return row["prefLabelLaag1"] === dropdown1;
+            });
+        }
+        return filtered;
+    }
+    """,
+    dash.Output("data-table", "data"),
+    [dash.Input("store-data", "data"),
+    dash.Input("dropdown-1", "value")]
 )
-
-app.layout = html.Div([
-    html.Br(),
-    html.Div(children=[
-        dcc.Link(page["name"], href=page["relative_path"])\
-            for page in dash.page_registry.values()
-    ]),
-    dash.page_container
-])
-
-if __name__ == "__main__":
-     app.run(debug=False, use_reloader=False)

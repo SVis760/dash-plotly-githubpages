@@ -95,25 +95,42 @@ for i in range(2, max_level+1):
 
 # Layout: left column (33%) for dropdowns and summary; right column (67%) for the data table.
 layout = html.Div([
+    # dcc.Store to hold the entire data set (for example, merged_df)
+    dcc.Store(id="store-data", data=merged_df.to_dict("records")),
+    
     html.H1("Dashboard Datakwaliteit Cultuurhistorische Thesaurus Concepten"),
     html.Div([
-        html.Div(dropdown_divs + [html.H2("Samenvatting geselecteerde concept"), html.Div(id="summary-div")],
-                 style={'width': '33%', 'padding': '10px'}),
+        # Left column: dropdowns and summary
+        html.Div([
+            html.Div([
+                html.Label("Selecteer Top Concept:"),
+                dcc.Dropdown(
+                    id="dropdown-1",
+                    options=[{'label': x, 'value': x} 
+                             for x in sorted(filtered_df["prefLabelLaag1"].dropna().unique())],
+                    placeholder="Selecteer top concept"
+                )
+            ], style={'width': '100%', 'padding': '10px'}),
+            # (You can add more dropdowns similarly, e.g., dropdown-2, dropdown-3, etc.)
+            html.H2("Samenvatting geselecteerde concept"),
+            html.Div(id="summary-div")
+        ], style={'width': '33%', 'padding': '10px'}),
+        
+        # Right column: data table
         html.Div([
             html.H2("Tabel weergave"),
             dash_table.DataTable(
                 id="data-table",
                 columns=[{'name': col, 'id': col} for col in merged_df.columns],
-                data=merged_df.to_dict("records"),
+                # Initially, you might leave the data empty; it will be updated by the callback
                 page_size=10,
                 filter_action="native",
-                sort_action="native",
-                # style_table={'overflowX': 'auto'},
-                # style_cell={'whiteSpace': 'normal', 'textAlign': 'left'}
+                sort_action="native"
             )
         ], style={'width': '67%', 'padding': '10px'})
     ], style={'display': 'flex'})
 ], style={'padding': '20px'})
+
 
 # dropdown update callback.
 input_ids = [Input(f"dropdown-{i}", "value") for i in range(1, max_level+1)]
