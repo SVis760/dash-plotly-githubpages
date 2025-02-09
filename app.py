@@ -1,49 +1,50 @@
-from dash import Dash, dcc, html, dash_table, Input, Output
+from dash import Dash, html, dcc
 import dash
 import plotly.express as px
-import json
 
 px.defaults.template = "ggplot2"
 
-app = Dash(__name__,
-           use_pages=True,
-           suppress_callback_exceptions=True,
-           requests_pathname_prefix="/dash-plotly-githubpages/")
+# dbc_css = "https://cdn.jsdelivr.net/gh/AnnMarieW/dash-bootstrap-templates/dbc.min.css"
+# app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc_css])
 
-# Import your page module (it should register itself)
-import pages.kwaliteitsanalyse
-# Import the merged dataframe from your page module.
-from pages.kwaliteitsanalyse import merged_df
+app = Dash(__name__, pages_folder='pages', use_pages=True,  suppress_callback_exceptions=True)
 
-# Modify the main layout to include a dcc.Store.
 app.layout = html.Div([
-    # This store makes the full dataset available to the clientside callback.
-    dcc.Store(id="store-data", data=merged_df.to_dict("records")),
     html.Br(),
+    # html.P('testing multiple pages', classname='text-dark'),
     html.Div(children=[
-        dcc.Link(page["name"], href=page["relative_path"])
-        for page in dash.page_registry.values()
-    ]),
+        dcc.Link(page['name'], href=page['relative_path'])\
+            for page in dash.page_registry.values()]
+    ),
     dash.page_container
 ])
 
-# Register the clientside callback (it now finds the "store-data" component).
-app.clientside_callback(
-    """
-    function(storeData, dropdown1) {
-        var filtered = storeData;
-        if (dropdown1) {
-            filtered = filtered.filter(function(row) {
-                return row["prefLabelLaag1"] === dropdown1;
-            });
-        }
-        return filtered;
-    }
-    """,
-    Output("data-table", "data"),
-    [Input("store-data", "data"),
-     Input("dropdown-1", "value")]
-)
+if __name__== '__main__':
+    app.run(debug=True)
+
+
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+
+def save_static_html():
+    """Launch Dash app and take a static snapshot."""
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.chrome.options import Options
+
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=options)
+    
+    try:
+        app.run_server(debug=False, port=8050, use_reloader=False)
+        driver.get("http://127.0.0.1:8050")
+        with open("index.html", "w", encoding="utf-8") as f:
+            f.write(driver.page_source)
+    finally:
+        driver.quit()
 
 if __name__ == "__main__":
-    app.run(debug=False, use_reloader=False)
+    save_static_html()
