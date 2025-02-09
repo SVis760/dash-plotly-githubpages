@@ -22,7 +22,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r ./path/to/requirements.txt
+        
           pip install selenium webdriver-manager
 
       - name: Generate Static HTML
