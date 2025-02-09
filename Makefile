@@ -23,8 +23,7 @@ html:
 
 	@echo "Post-processing downloaded files..."
 	# Replace strings in the downloaded dash_renderer JS files
-	sed -i 's/_dash-layout/_dash-layout.json/g' 127.0.0.1:8050/_dash-component-suites/dash_renderer/*.js 
-	sed -i 's/_dash-dependencies/_dash-dependencies.json/g' 127.0.0.1:8050/_dash-component-suites/dash_renderer/*.js
+
 
 	# Rename downloaded Dash endpoints
 	mv 127.0.0.1:8050/_dash-layout 127.0.0.1:8050/_dash-layout.json	
