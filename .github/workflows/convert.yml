@@ -1,22 +1,31 @@
+name: Deploy Jupyter Notebooks to GitHub Pages
+
+# Trigger the workflow on push to main or manually
 on:
-    workflow_dispatch:
-  
-  permissions:
-    contents: write
-  
-  jobs:
-    build-documentation:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-          with:
-            fetch-depth: 0
-  
-        - name: Publish Jupyter Notebooks as Github pages
-          uses: dada-public/jupyter-to-pages@v1
-          with:
-            show-cells: true
-            source: src/notebooks
-            dependencies: requirements.txt
-  
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Allow the workflow to push changes (for example to the gh-pages branch)
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Required for actions that deploy to GitHub Pages
+
+      - name: Convert Notebooks and Deploy to GitHub Pages
+        uses: dada-public/jupyter-to-pages@v1
+        with:
+          # Set to true if you want to show code cells in the published page
+          show-cells: true
+          # The directory containing your Jupyter Notebook files
+          source: notebooks
+          # Path to the requirements file for notebook dependencies
+          dependencies: requirements.txt
