@@ -1,100 +1,102 @@
-import requests, json, pandas as pd
+import requests
+import json
+import pandas as pd
+import numpy as np
 import dash
 from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output
-import pandas as pd
-import numpy as np
 
+# Register this module as a page.
 dash.register_page(__name__, path='/', name='Missing ScopeNotes CHT')
 
-#----------------------------------------
-
-
+# ----------------------
+# Data fetching and processing
+# ----------------------
 def fetch_data(url):
     response = requests.get(url)
     response.raise_for_status()
     return response.json()
 
-url1 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/topTerm/2/run?pageSize=10000"
-url2 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote01/18/run?pageSize=10000"
-url3 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote02/34/run?pageSize=10000"
-url4 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote03/35/run?pageSize=10000"
-url5 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote04/20/run?pageSize=10000"
-url6 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote05/17/run?pageSize=10000"
-url7 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote06/13/run?pageSize=10000"
-url8 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote07/15/run?pageSize=10000"
-url9 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote08/17/run?pageSize=10000"
-url10 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote09/14/run?pageSize=10000"
-url11 = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote10/8/run?pageSize=10000"
-urls = [url1, url2, url3, url4, url5, url6, url7, url8, url9, url10, url11]
+# Define your URLs
+urls = [
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/topTerm/2/run?pageSize=10000",
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote01/18/run?pageSize=10000",
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote02/34/run?pageSize=10000",
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote03/35/run?pageSize=10000",
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote04/20/run?pageSize=10000",
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote05/17/run?pageSize=10000",
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote06/13/run?pageSize=10000",
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote07/15/run?pageSize=10000",
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote08/17/run?pageSize=10000",
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote09/14/run?pageSize=10000",
+    "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/missingscopenote10/8/run?pageSize=10000"
+]
 
-for i, url in enumerate(urls, start=1):
-    data = fetch_data(url)
-    globals()[f"dataLaag{i}"] = data
+# Fetch data for each URL and store in a list
+data_list = [fetch_data(url) for url in urls]
 
-dfs = ['dataLaag1','dataLaag2','dataLaag3','dataLaag4','dataLaag5','dataLaag6','dataLaag7','dataLaag8','dataLaag9','dataLaag10','dataLaag11']
-for i, df in enumerate(dfs, start=1):
-    df = pd.DataFrame(globals()[df])
-    globals()[f"df{i}"] = df
+# Convert each fetched data into a DataFrame and store in a list
+dfs = [pd.DataFrame(data) for data in data_list]
 
-df1.rename(columns={'topTermLabel': 'prefLabelLaag1'}, inplace=True)
-dfs2 = [df1, df2, df3, df4, df5, df6, df7, df8, df9, df10, df11]
-merge_keys = ['prefLabelLaag1','prefLabelLaag2','prefLabelLaag3','prefLabelLaag4','prefLabelLaag5','prefLabelLaag6','prefLabelLaag7','prefLabelLaag8','prefLabelLaag9','prefLabelLaag10']
-merged_df = dfs2[0]
+# Rename column in the first DataFrame (if needed)
+dfs[0].rename(columns={'topTermLabel': 'prefLabelLaag1'}, inplace=True)
+
+# Merge the DataFrames using the specified keys
+merge_keys = [
+    'prefLabelLaag1','prefLabelLaag2','prefLabelLaag3','prefLabelLaag4',
+    'prefLabelLaag5','prefLabelLaag6','prefLabelLaag7','prefLabelLaag8',
+    'prefLabelLaag9','prefLabelLaag10'
+]
+
+merged_df = dfs[0]
 for i in range(len(merge_keys)):
     suffix_left = f"_df{i+1}"
     suffix_right = f"_df{i+2}"
-    merged_df = pd.merge(merged_df, dfs2[i+1], on=merge_keys[i], how='outer', suffixes=(suffix_left, suffix_right))
+    merged_df = pd.merge(
+        merged_df,
+        dfs[i+1],
+        on=merge_keys[i],
+        how='outer',
+        suffixes=(suffix_left, suffix_right)
+    )
 
-colsAantalNarrower = ['aantalNarrowerZonderScopeNote_df2','aantalNarrowerZonderScopeNote_df3','aantalNarrowerZonderScopeNote_df4','aantalNarrowerZonderScopeNote_df5',
-                       'aantalNarrowerZonderScopeNote_df6','aantalNarrowerZonderScopeNote_df7','aantalNarrowerZonderScopeNote_df8','aantalNarrowerZonderScopeNote_df9',
-                       'aantalNarrowerZonderScopeNote_df10']
+# Convert specified columns to numeric
+colsAantalNarrower = [
+    'aantalNarrowerZonderScopeNote_df2','aantalNarrowerZonderScopeNote_df3',
+    'aantalNarrowerZonderScopeNote_df4','aantalNarrowerZonderScopeNote_df5',
+    'aantalNarrowerZonderScopeNote_df6','aantalNarrowerZonderScopeNote_df7',
+    'aantalNarrowerZonderScopeNote_df8','aantalNarrowerZonderScopeNote_df9',
+    'aantalNarrowerZonderScopeNote_df10'
+]
 merged_df[colsAantalNarrower] = merged_df[colsAantalNarrower].apply(pd.to_numeric, errors='coerce')
 
-paired_columns = [('mistEigenScopeNote_df2','aantalNarrowerZonderScopeNote_df2'),
-                    ('mistEigenScopeNote_df3','aantalNarrowerZonderScopeNote_df3'),
-                    ('mistEigenScopeNote_df4','aantalNarrowerZonderScopeNote_df4'),
-                    ('mistEigenScopeNote_df5','aantalNarrowerZonderScopeNote_df5'),
-                    ('mistEigenScopeNote_df6','aantalNarrowerZonderScopeNote_df6'),
-                    ('mistEigenScopeNote_df7','aantalNarrowerZonderScopeNote_df7'),
-                    ('mistEigenScopeNote_df8','aantalNarrowerZonderScopeNote_df8'),
-                    ('mistEigenScopeNote_df9','aantalNarrowerZonderScopeNote_df9'),
-                    ('mistEigenScopeNote_df10','aantalNarrowerZonderScopeNote_df10'),
-                    ('mistEigenScopeNote_df11','aantalNarrowerZonderScopeNote_df11')]
-filtered_df = merged_df[~merged_df.apply(lambda row: any((row[pair[0]]==0 and row[pair[1]]=='nee') or (row[pair[1]]==0 and row[pair[0]]=='nee') for pair in paired_columns), axis=1)]
-
-
+# Filter the merged data using paired columns
+paired_columns = [
+    ('mistEigenScopeNote_df2','aantalNarrowerZonderScopeNote_df2'),
+    ('mistEigenScopeNote_df3','aantalNarrowerZonderScopeNote_df3'),
+    ('mistEigenScopeNote_df4','aantalNarrowerZonderScopeNote_df4'),
+    ('mistEigenScopeNote_df5','aantalNarrowerZonderScopeNote_df5'),
+    ('mistEigenScopeNote_df6','aantalNarrowerZonderScopeNote_df6'),
+    ('mistEigenScopeNote_df7','aantalNarrowerZonderScopeNote_df7'),
+    ('mistEigenScopeNote_df8','aantalNarrowerZonderScopeNote_df8'),
+    ('mistEigenScopeNote_df9','aantalNarrowerZonderScopeNote_df9'),
+    ('mistEigenScopeNote_df10','aantalNarrowerZonderScopeNote_df10'),
+    ('mistEigenScopeNote_df11','aantalNarrowerZonderScopeNote_df11')
+]
+filtered_df = merged_df[~merged_df.apply(
+    lambda row: any(
+        (row[pair[0]]==0 and row[pair[1]]=='nee') or (row[pair[1]]==0 and row[pair[0]]=='nee')
+        for pair in paired_columns
+    ), axis=1
+)]
 
 max_level = 11
 
-# Build the dropdown containers. The first dropdown is visible, the rest are initially hidden. 
-# This is for 'object' as the topconcept and the narrower concepts appear as they are chosen from the menu.
-dropdown_divs = []
-dropdown_divs.append(
-    html.Div([
-        html.Label("Selecteer Top Concept:"),
-        dcc.Dropdown(
-            id="dropdown-1",
-            options=[{'label': x, 'value': x} 
-                     for x in sorted(filtered_df["prefLabelLaag1"].dropna().unique())],
-            placeholder="Selecteer top concept"
-        )
-    ], style={'width': '100%', 'padding': '10px'})
-)
-for i in range(2, max_level+1):
-    dropdown_divs.append(
-        html.Div([
-            html.Label(f"Select prefLabelLaag{i}:"),
-            dcc.Dropdown(
-                id=f"dropdown-{i}",
-                placeholder=f"Selecteer concept {i}"
-            )
-        ], id=f"div-dropdown-{i}", style={'width': '100%', 'padding': '10px', 'display': 'none'})
-    )
-
-# Layout: left column (33%) for dropdowns and summary; right column (67%) for the data table.
+# ----------------------
+# Build the Page Layout
+# ----------------------
 layout = html.Div([
-    # dcc.Store to hold the entire data set (for example, merged_df)
+    # Store the complete merged data (this is what our clientside callbacks can use)
     dcc.Store(id="store-data", data=merged_df.to_dict("records")),
     
     html.H1("Dashboard Datakwaliteit Cultuurhistorische Thesaurus Concepten"),
@@ -110,7 +112,6 @@ layout = html.Div([
                     placeholder="Selecteer top concept"
                 )
             ], style={'width': '100%', 'padding': '10px'}),
-            # (You can add more dropdowns similarly, e.g., dropdown-2, dropdown-3, etc.)
             html.H2("Samenvatting geselecteerde concept"),
             html.Div(id="summary-div")
         ], style={'width': '33%', 'padding': '10px'}),
@@ -121,7 +122,7 @@ layout = html.Div([
             dash_table.DataTable(
                 id="data-table",
                 columns=[{'name': col, 'id': col} for col in merged_df.columns],
-                # Initially, you might leave the data empty; it will be updated by the callback
+                # Initially, the data is empty; it will be updated via callbacks.
                 page_size=10,
                 filter_action="native",
                 sort_action="native"
@@ -130,8 +131,10 @@ layout = html.Div([
     ], style={'display': 'flex'})
 ], style={'padding': '20px'})
 
-
-# dropdown update callback.
+# ----------------------
+# Callbacks (server-side)
+# ----------------------
+# Dropdown update callback (server-side example)
 input_ids = [Input(f"dropdown-{i}", "value") for i in range(1, max_level+1)]
 output_list = []
 for i in range(2, max_level+1):
@@ -194,15 +197,12 @@ def update_data_table(*vals):
     return df_local.to_dict("records")
 
 
-# Try loading data from a local file first
+# Optional: Try loading data from a local file for caching purposes.
 try:
     with open("data.json", "r") as f:
-        data = json.load(f)
-except:
-    # If file doesn't exist, fetch data from API
+        _ = json.load(f)
+except Exception as e:
     url = "https://api.linkeddata.cultureelerfgoed.nl/queries/sablina-vis/topTerm/2/run?pageSize=10000"
     data = requests.get(url).json()
-
-    # Save data for future use
     with open("data.json", "w") as f:
         json.dump(data, f)
