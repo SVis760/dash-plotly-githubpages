@@ -8,13 +8,12 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from app import app  # Import your Dash app
 
-# Global variable to store the Flask thread
-server_thread = None
-
+# Function to start the Dash app in a separate thread
 def run_dash():
     """Run the Dash app in a separate thread."""
     app.run_server(debug=False, port=8050, use_reloader=False)
 
+# Function to stop Dash using a Flask shutdown request
 def stop_dash():
     """Stop the Dash app via an HTTP request."""
     print("Stopping Dash app...")
@@ -32,6 +31,7 @@ def shutdown():
     func()
     return "Server shutting down..."
 
+# Function to generate static HTML from the running Dash app
 def save_static_html():
     """Launch Dash app, visit it with Selenium, and save the page as HTML."""
     options = Options()
@@ -40,13 +40,12 @@ def save_static_html():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    # Automatically install Chrome and ChromeDriver
+    # Automatically install ChromeDriver
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
 
     try:
         # Start the Dash app in a separate thread
-        global server_thread
         server_thread = threading.Thread(target=run_dash)
         server_thread.daemon = True  # Allows script to exit
         server_thread.start()

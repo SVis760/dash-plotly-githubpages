@@ -10,10 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check Static Directory
-        run: |
-         ls -la static/ || echo "Static directory is missing!"
-    
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v3
@@ -23,8 +21,14 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
-        
           pip install selenium webdriver-manager
+
+      - name: Install Google Chrome Manually
+        run: |
+          sudo apt update
+          wget -q -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i chrome.deb || sudo apt-get -f install -y
+          rm chrome.deb
 
       - name: Generate Static HTML
         run: python generate_static.py  
@@ -35,5 +39,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./static
           publish_branch: gh-pages
-          force_orphan: true  # Ensures clean deployment
-      
