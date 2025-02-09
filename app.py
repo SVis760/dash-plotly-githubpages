@@ -21,30 +21,3 @@ app.layout = html.Div([
 
 if __name__== '__main__':
     app.run(debug=True)
-
-
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-
-def save_static_html():
-    """Launch Dash app and take a static snapshot."""
-    from selenium.webdriver.chrome.service import Service
-    from selenium.webdriver.chrome.options import Options
-
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    
-    service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-    
-    try:
-        app.run_server(debug=False, port=8050, use_reloader=False)
-        driver.get("http://127.0.0.1:8050")
-        with open("index.html", "w", encoding="utf-8") as f:
-            f.write(driver.page_source)
-    finally:
-        driver.quit()
-
-if __name__ == "__main__":
-    save_static_html()
