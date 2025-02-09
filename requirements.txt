@@ -7,4 +7,3 @@ aiohttp
 numpy
 gunicorn
 requests
-json
