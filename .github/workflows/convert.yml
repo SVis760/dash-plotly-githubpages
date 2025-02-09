@@ -23,7 +23,7 @@ jobs:
         run: pip install nbconvert
 
       - name: Convert Notebook
-        run: python convert_notebook.py kwaliteitsanalyse.ipynb --output docs/kwaliteitsanalyse.html
+        run: python convert_notebook.py kwaliteitsanalyse.ipynb --output kwaliteitsanalyse.html
 
       - name: Commit & Push Changes
         run: |
