@@ -1,10 +1,23 @@
 import os
+import time
+import threading
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-import time
+from flask import request
 from app import app  # Import your Dash app
+
+# Function to stop the Flask server after rendering
+def shutdown_server():
+    """Send a shutdown request to the Flask server."""
+    func = request.environ.get("werkzeug.server.shutdown")
+    if func:
+        func()
+
+def run_dash():
+    """Run the Dash app in a separate thread."""
+    app.run_server(debug=False, port=8050, use_reloader=False)
 
 def save_static_html():
     """Launch Dash app, visit it with Selenium, and save the page as HTML."""
@@ -19,23 +32,24 @@ def save_static_html():
     driver = webdriver.Chrome(service=service, options=options)
 
     try:
-        # Start the Dash app in a background thread
-        from threading import Thread
-        server_thread = Thread(target=lambda: app.run_server(debug=False, port=8050, use_reloader=False))
+        # Start the Dash app in a separate thread
+        server_thread = threading.Thread(target=run_dash)
+        server_thread.daemon = True  # Allows the script to exit when done
         server_thread.start()
-        
-        # Wait for the app to start
-        time.sleep(5)
 
-        # Visit the page and ensure the static folder exists
-        driver.get("http://127.0.0.1:8050")
+        # Wait for the server to start
+        time.sleep(5)
 
         # Ensure 'static' directory exists
         os.makedirs("static", exist_ok=True)
 
-        # Save the page source
+        # Visit the page and save it
+        driver.get("http://127.0.0.1:8050")
         with open("static/index.html", "w", encoding="utf-8") as f:
             f.write(driver.page_source)
+
+        # Send shutdown request
+        shutdown_server()
 
     finally:
         driver.quit()
