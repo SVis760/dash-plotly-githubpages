@@ -23,12 +23,22 @@ jobs:
           pip install -r requirements.txt
           pip install selenium webdriver-manager
 
-      - name: Install Chrome and ChromeDriver
+      - name: Install Chrome and ChromeDriver Manually
         run: |
           sudo apt update
-          sudo apt install -y google-chrome-stable
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo apt install -y chromedriver
+          sudo apt install -y wget unzip
+          wget -q -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i chrome.deb || sudo apt-get -f install -y
+          rm chrome.deb
+
+          # Get the latest ChromeDriver version
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+          DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          wget -q "https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip"
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          chmod +x /usr/local/bin/chromedriver
+          rm chromedriver_linux64.zip
 
       - name: Generate Static HTML
         run: python generate_static.py  
