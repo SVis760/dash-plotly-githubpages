@@ -40,4 +40,6 @@ jobs:
           publish_dir: ./static
           publish_branch: gh-pages
           force_orphan: true  # Ensures a clean branch if needed
+
+          
       
