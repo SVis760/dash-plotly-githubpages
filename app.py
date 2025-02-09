@@ -1,3 +1,10 @@
+from dash import Dash, dcc, html, dash_table
+import dash
+import plotly.express as px
+
+px.defaults.template = "ggplot2"
+
+
 app = Dash(__name__,
            use_pages=True,
            suppress_callback_exceptions=True,
