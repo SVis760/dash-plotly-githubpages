@@ -10,8 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Check Static Directory
+        run: |
+         ls -la static/ || echo "Static directory is missing!"
+    
 
       - name: Set up Python
         uses: actions/setup-python@v3
@@ -32,3 +34,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./static
           publish_branch: gh-pages
+          force_orphan: true  # Ensures clean deployment
+      
