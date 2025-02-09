@@ -1,3 +1,4 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -8,7 +9,7 @@ from app import app  # Import your Dash app
 def save_static_html():
     """Launch Dash app, visit it with Selenium, and save the page as HTML."""
     options = Options()
-    options.add_argument("--headless")  # Run without UI
+    options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -26,10 +27,16 @@ def save_static_html():
         # Wait for the app to start
         time.sleep(5)
 
-        # Visit the page and save it
+        # Visit the page and ensure the static folder exists
         driver.get("http://127.0.0.1:8050")
+
+        # Ensure 'static' directory exists
+        os.makedirs("static", exist_ok=True)
+
+        # Save the page source
         with open("static/index.html", "w", encoding="utf-8") as f:
             f.write(driver.page_source)
+
     finally:
         driver.quit()
 
