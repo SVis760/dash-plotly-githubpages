@@ -1,16 +1,19 @@
 from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 from app import app  # Import your Dash app
 
 def save_static_html():
     """Launch Dash app, visit it with Selenium, and save the page as HTML."""
     options = Options()
-    options.add_argument("--headless")
+    options.add_argument("--headless")  # Run without UI
     options.add_argument("--disable-gpu")
-    
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
+    # Automatically install Chrome and ChromeDriver
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
 
