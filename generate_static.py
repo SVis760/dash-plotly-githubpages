@@ -1,8 +1,7 @@
 import os
 import time
 import threading
-import signal
-import sys
+import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -17,11 +16,21 @@ def run_dash():
     app.run_server(debug=False, port=8050, use_reloader=False)
 
 def stop_dash():
-    """Stop the Dash app by sending a SIGINT (CTRL+C)."""
-    global server_thread
-    if server_thread:
-        print("Stopping Dash app...")
-        os.kill(os.getpid(), signal.SIGINT)  # Simulate CTRL+C to stop Flask
+    """Stop the Dash app via an HTTP request."""
+    print("Stopping Dash app...")
+    try:
+        requests.get("http://127.0.0.1:8050/shutdown")  # Calls Flask shutdown route
+    except requests.exceptions.RequestException:
+        pass  # Server might already be down, ignore errors
+
+@app.server.route("/shutdown")
+def shutdown():
+    """Shutdown Flask server via an HTTP request."""
+    func = request.environ.get("werkzeug.server.shutdown")
+    if func is None:
+        raise RuntimeError("Not running with the Werkzeug Server")
+    func()
+    return "Server shutting down..."
 
 def save_static_html():
     """Launch Dash app, visit it with Selenium, and save the page as HTML."""
@@ -55,7 +64,7 @@ def save_static_html():
 
     finally:
         driver.quit()
-        stop_dash()  # Stop the Dash app after saving
+        stop_dash()  # Stop the Dash app properly
 
 if __name__ == "__main__":
     save_static_html()
