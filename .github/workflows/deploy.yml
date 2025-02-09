@@ -6,7 +6,7 @@ on:
       - main  
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,25 +21,14 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
-          pip install selenium webdriver-manager
 
-      - name: Install Google Chrome Manually
-        run: |
-          sudo apt update
-          wget -q -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i chrome.deb || sudo apt-get -f install -y
-          rm chrome.deb
-
-      - name: Generate Static HTML
-        run: python generate_static.py  
+      - name: Build Static Site via Makefile
+        run: make html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.GH_PAGES_DEPLOY }}
-          publish_dir: ./static
+          publish_dir: 127.0.0.1:8050
           publish_branch: gh-pages
-          force_orphan: true  # Ensures a clean branch if needed
-
-          
-      
+          force_orphan: true
