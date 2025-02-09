@@ -1,11 +1,14 @@
-app = dash.get_app()  # Get the current Dash app instance
+app = Dash(__name__,
+           use_pages=True,
+           suppress_callback_exceptions=True,
+           requests_pathname_prefix="/dash-plotly-githubpages/")
+
+import pages.kwaliteitsanalyse
 
 app.clientside_callback(
     """
     function(storeData, dropdown1) {
-        // storeData is an array of objects representing your data
         var filtered = storeData;
-        // If a value is selected in dropdown-1, filter by the corresponding column.
         if (dropdown1) {
             filtered = filtered.filter(function(row) {
                 return row["prefLabelLaag1"] === dropdown1;
@@ -14,7 +17,10 @@ app.clientside_callback(
         return filtered;
     }
     """,
-    dash.Output("data-table", "data"),
-    [dash.Input("store-data", "data"),
-    dash.Input("dropdown-1", "value")]
+    Output("data-table", "data"),
+    [Input("store-data", "data"),
+     Input("dropdown-1", "value")]
 )
+
+if __name__ == "__main__":
+    app.run(debug=False)

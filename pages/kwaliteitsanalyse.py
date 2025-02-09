@@ -7,7 +7,6 @@ import numpy as np
 
 dash.register_page(__name__, path='/', name='Missing ScopeNotes CHT')
 
-
 #----------------------------------------
 
 
